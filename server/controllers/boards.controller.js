@@ -57,7 +57,7 @@ const deleteBoard = async (req, res) => {
     const userId = req.user._id;
     const boardId = req.params.boardId;
     console.log(boardId);
-
+    
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $pull: { boards: { _id: boardId } } },
