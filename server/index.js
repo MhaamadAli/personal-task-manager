@@ -12,6 +12,9 @@ app.use("/auth", authRoutes);
 const boardRoutes = require("./routes/boards.routes");
 app.use("/boards", boardRoutes);
 
+const taskRoutes = require("./routes/tasks.routes");
+app.use("/tasks", taskRoutes);
+
 app.listen(PORT, (err) => {
   if (err) throw new Error(err);
   console.log(`Server is listining on port ${PORT}`);

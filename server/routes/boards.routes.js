@@ -8,5 +8,4 @@ router.get("/:id", isAuthenticated, boardController.getBoard);
 router.post("/", isAuthenticated, boardController.addBoard);
 router.put("/:boardid", isAuthenticated, boardController.editBoard);
 router.delete("/:boardid", isAuthenticated, boardController.deleteBoard);
-
 module.exports = router;
