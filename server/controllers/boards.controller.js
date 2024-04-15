@@ -10,8 +10,6 @@ const getAllBoards = async (req, res) => {
   }
 };
 
-
-
 const getBoard = (req, res) => {
   const { id } = req.params;
   try {
@@ -36,42 +34,57 @@ const addBoard = async (req, res) => {
   }
 };
 const editBoard = async (req, res) => {
-  const { id } = req.params;
   try {
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      {
-        $set: { "boards.$[elem]": req.body },
-      },
-      { new: true, arrayFilters: [{ "elem._id": id }] }
-    );
+    const userId = req.user._id;
+    const boardId = req.params.boardid;
+    const title = req.body.title;
 
-    return res.status(200).json(user);
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const boardIndex = user.boards.findIndex(
+      (board) => board._id.toString() === boardId
+    );
+    if (boardIndex === -1) {
+      return res.status(404).json({ message: "Board not found" });
+    }
+
+
+    user.boards[boardIndex] = { ...user.boards[boardIndex], title };
+
+    await user.save();
+
+    res.json({ message: "Board updated successfully" });
   } catch (error) {
-    console.log(error);
-    return res.status(500).send("Internal server error");
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
+
 const deleteBoard = async (req, res) => {
   try {
     const userId = req.user._id;
-    const boardId = req.params.boardId;
+    const boardId = req.params.boardid;
     console.log(boardId);
-    
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $pull: { boards: { _id: boardId } } },
-      { new: true } 
+      { new: true }
     );
 
     if (!updatedUser) {
-      return res.status(404).json({ message: 'User or board not found' });
+      return res.status(404).json({ message: "User or board not found" });
     }
 
-    res.json({ message: 'Board deleted successfully', board: updatedUser.boards });
+    res.json({
+      message: "Board deleted successfully",
+      board: updatedUser.boards,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -93,5 +106,5 @@ module.exports = {
   addBoard,
   editBoard,
   deleteBoard,
-  addColumn
+  addColumn,
 };
