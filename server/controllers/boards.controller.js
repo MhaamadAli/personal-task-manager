@@ -37,28 +37,21 @@ const editBoard = async (req, res) => {
   try {
     const userId = req.user._id;
     const boardId = req.params.boardid;
-    const title = req.body.title;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    const boardIndex = user.boards.findIndex(
-      (board) => board._id.toString() === boardId
+    const title = req.body.title
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: userId, 'boards._id': boardId }, 
+      { $set: { 'boards.$': { _id: boardId, title } } }, 
+      { new: true } 
     );
-    if (boardIndex === -1) {
-      return res.status(404).json({ message: "Board not found" });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User or board not found" });
     }
 
-
-    user.boards[boardIndex] = { ...user.boards[boardIndex], title };
-
-    await user.save();
-
-    res.json({ message: "Board updated successfully" });
+    return res.status(200).json(updatedUser);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    console.log(error);
+    return res.status(500).send("Internal server error");
   }
 };
 
